@@ -2,22 +2,38 @@ import mongoose, { Schema } from "mongoose";
 
 const MealLogSchema = new Schema(
   {
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+
+    date: {
+      type: Date,
+      required: true,
+    },
+
     meals: [
       {
-        meal: {
-          type: Schema.Types.ObjectId, // Reference to a Meal or Recipe document
-          ref: "Recipe", // Replace "Recipe" with your actual meal model name
+        recipe: {
+          type: Schema.Types.ObjectId,
+          ref: "Recipe",
           required: true,
         },
-        serving: {
+
+        servings: {
           type: Number,
-          required: true,
-          min: 1,
+          default: 1,
+        },
+
+        eatenAt: {
+          type: Date,
+          default: Date.now,
         },
       },
     ],
   },
-  { TimeStamps: true }
+  { timestamps: true }
 );
 
 export const MealLog = mongoose.model("MealLog", MealLogSchema);

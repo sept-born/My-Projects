@@ -34,6 +34,12 @@ const UserSchema = new Schema(
         ref: "Recipe",
       },
     ],
+    mealLogs: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "MealLog",
+      },
+    ],
   },
   { timestamps: true }
 );

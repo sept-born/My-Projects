@@ -8,6 +8,13 @@ const RecipeSchema = new Schema(
       unique: true,
       trim: true,
     },
+    nutrition: {
+      calories: Number,
+      protein: Number,
+      carbs: Number,
+      fat: Number,
+    },
+
     ingredients: [
       {
         type: String,
