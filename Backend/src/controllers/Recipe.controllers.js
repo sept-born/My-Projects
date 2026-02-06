@@ -4,14 +4,37 @@ import { ApiError } from "../utils/ApiError.js";
 import { Recipe } from "../models/Recipe.model.js";
 import { User } from "../models/users.model.js";
 const EditRecipe = asyncHandler(async (req, res) => {
-  return res.status(200).json({ success: true });
+  const { recipeId } = req.params;
+  const { title, nutrition, ingredients, instructions } = req.body;
+
+  //  Find recipe
+  const recipe = await Recipe.findById(recipeId);
+  if (!recipe) {
+    throw new ApiError(404, "Recipe not found");
+  }
+
+  // Authorization check
+  if (recipe.owner.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, "You are not allowed to edit this recipe");
+  }
+
+  //  Update fields
+  if (title) recipe.title = title;
+  if (nutrition) recipe.nutrition = nutrition;
+  if (ingredients) recipe.ingredients = ingredients;
+  if (instructions) recipe.instructions = instructions;
+
+  await recipe.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, recipe, "Recipe updated successfully"));
 });
 const AddRecipe = asyncHandler(async (req, res) => {
   //   console.log("checkpoint -0 ");
 
   const { title, nutrition, ingredients, instructions } = req.body;
   const owner = req.user._id;
-  console.log("checkpoint -1 ");
 
   const existRecipe = await Recipe.findOne({ title });
   if (existRecipe) {
@@ -24,7 +47,6 @@ const AddRecipe = asyncHandler(async (req, res) => {
     instructions,
     owner,
   });
-  console.log("checkpoint -2 ");
   const createdRecipe = await Recipe.findById(recipe._id).select(
     "-nutrition -ingredients -instructions"
   );
@@ -39,7 +61,10 @@ const AddRecipe = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, createdRecipe, "Recipe added Successfully"));
 });
 const getRecipe = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user._id).populate("personalRecipe");
+  const user = await User.findById(req.user._id).populate(
+    "personalRecipe",
+    " -owner"
+  );
 
   return res
     .status(200)
@@ -48,8 +73,24 @@ const getRecipe = asyncHandler(async (req, res) => {
     );
 });
 const deleteRecipe = asyncHandler(async (req, res) => {
-  return res.status(200).json({ success: true });
-});
+  const { recipeId } = req.params;
 
-// getUserProfile is incomplete
+  // Find recipe
+  const recipe = await Recipe.findById(recipeId);
+  if (!recipe) {
+    throw new ApiError(404, "Recipe not found");
+  }
+
+  // Authorization check (VERY IMPORTANT)
+  if (recipe.owner.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, "You are not allowed to delete this recipe");
+  }
+
+  //  Delete
+  await Recipe.findByIdAndDelete(recipeId);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, null, "Recipe deleted successfully"));
+});
 export { AddRecipe, deleteRecipe, EditRecipe, getRecipe };

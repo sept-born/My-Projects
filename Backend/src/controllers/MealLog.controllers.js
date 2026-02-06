@@ -5,14 +5,13 @@ import { MealLog } from "../models/MealLog.model.js";
 import { Recipe } from "../models/Recipe.model.js";
 
 export const addMeal = asyncHandler(async (req, res) => {
-  const { recipeId, servings = 1, eatenAt } = req.body;
-
-  if (!recipeId) {
-    throw new ApiError(400, "Recipe is required");
+  const { MealName, servings = 1, eatenAt } = req.body;
+  if (!MealName) {
+    throw new ApiError(400, "MealName is required");
   }
 
   // 1️⃣ Validate recipe exists
-  const recipe = await Recipe.findById(recipeId);
+  const recipe = await Recipe.findOne({ title: MealName });
   if (!recipe) {
     throw new ApiError(404, "Recipe not found");
   }
@@ -22,7 +21,7 @@ export const addMeal = asyncHandler(async (req, res) => {
 
   mealDate.setHours(0, 0, 0, 0);
 
-  // 3️⃣ Find or create MealLog for that day
+  // 3️⃣ Find or create MealLo  g for that day
   let mealLog = await MealLog.findOne({
     user: req.user._id,
     date: mealDate,
@@ -38,7 +37,7 @@ export const addMeal = asyncHandler(async (req, res) => {
 
   // 4️⃣ Add meal
   mealLog.meals.push({
-    recipe: recipeId,
+    recipe: recipe._id,
     servings,
     eatenAt: eatenAt || new Date(),
   });

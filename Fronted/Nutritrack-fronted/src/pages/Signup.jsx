@@ -1,6 +1,8 @@
 import { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 export default function Signup() {
+  const navigate = useNavigate();
   const [formData, setformData] = useState({
     fullname: "",
     email: "",
@@ -15,10 +17,18 @@ export default function Signup() {
       [name]: value,
     }));
   };
-  const handleSubmit = async () => {
-    await axios
-      .post("http://localhost:8000/api/v1/users/register", formData)
-      .catch(setError(error));
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(
+        "http://localhost:8000/api/v1/users/register",
+        formData,
+        { withCredentials: true }, // important if cookies are used
+      );
+      navigate("/Dashboard");
+    } catch (err) {
+      setError(err.response?.data?.message || "Something went wrong");
+    }
   };
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">

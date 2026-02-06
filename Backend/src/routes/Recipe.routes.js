@@ -10,8 +10,8 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 const router = Router();
 
 router.route("/AddRecipe").post(verifyJWT, AddRecipe);
-router.route("/deleteRecipe").post(verifyJWT, deleteRecipe);
-router.route("/EditRecipe").post(verifyJWT, EditRecipe);
+router.route("/EditRecipe/:recipeId").put(verifyJWT, EditRecipe);
+router.delete("/delete/:recipeId", verifyJWT, deleteRecipe);
 router.route("/getRecipe").get(verifyJWT, getRecipe);
 
 export default router;
